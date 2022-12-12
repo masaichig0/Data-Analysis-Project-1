@@ -8,3 +8,7 @@ The result might help real estate investor to make great decision to buy/sell.
 
 ### scrape_craigslist_for_information.ipynb:
 Python code to collect data from Craigslist. I will use this data to analyze rental market in the area. 
+Then practice Analyzing following the way I am learning from Google Data Analytics Course.
+
+### scrape_data.ipynb
+Scrape data then save the data in CSV files. 
