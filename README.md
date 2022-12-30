@@ -17,5 +17,16 @@ Scrape data then save the data in CSV files.
 
 Excel sheet to calculate ROI and property values. 
 
-#### Tool instruction:
-Input numbers in grey cells on ROI number insert and Caculation offering price pages. Then the result will come up on Output page.  
+#### Instruction:
+
+* Number input page : Calculating offering Price & ROI Calculation. 
+    Those 2 pages is only place you need to enter the number to get result. 
+
+* Outputs page: Dashboard like page. - You can find all the information you need to know in this page. 
+
+* Every other pages are the details, so if you like to know where the number is comming from, you can check other pages out. 
+
+* Underlined text is most likely the link to number insert or the web search to find out the information you might want to know. 
+
+* Only need to insert in Grey cells. 
+
