@@ -12,8 +12,11 @@ import matplotlib.pyplot as plt
 
 # In[ ]:
 
-
 def add_params(df):
+    # First drop duplicate and reset the index. 
+    df.drop_duplicates(subset="Post Title", inplace=True)
+    df = df.reset_index(drop=True)
+    
     # Convert Datetime then split seperate columns
     df['Post Datetime'] = pd.to_datetime(df["Post Datetime"])
     df['Post Date'] = df['Post Datetime'].dt.date
@@ -27,7 +30,7 @@ def add_params(df):
         lower_neighbor.append(neighbor)
     df["Neighborhood"] = lower_neighbor
 
-    df = df[["PostAreaCode", "City Code", 'Post Datetime', 'Post Date', 'Post Time', 'Post Title', 'Post URL', 'Neighborhood', 'Bedroom', 'SQFT', 'Price']]
+    # df = df[["PostAreaCode", 'Post Datetime', 'Post Date', 'Post Time', 'Post Title', 'Post URL', 'Neighborhood', 'Bedroom', 'SQFT', 'Price']]
     
     # Convert Bedroom number strings to Integer then NaN value to 0 assume 0 bedroom is studio appartment. 
     df["Bedroom"] = pd.to_numeric(df["Bedroom"], errors='ignore').astype('Int64')
@@ -49,24 +52,21 @@ def add_params(df):
     df["Price/SQFT"] = df["Price"] / df["SQFT"]
     df['Price/SQFT'].fillna(0, inplace=True)
     df["SQFT"] = df["SQFT"].fillna(0)
-
+    
     # Chnage PostAreaCode to numeric values
     area_coded = pd.Categorical(df["PostAreaCode"]).codes
     df["PostArea_coded"] = area_coded
-    df = df[['PostAreaCode', "City Code", "PostArea_coded", 'Post Datetime', 'Post Date', 'Post Time', 'Post Title',
-             'Post URL', 'Neighborhood', 'Bedroom', 'SQFT', 'Price', 'IsFurnished',
-             'Price/SQFT']]
+    
+    # Categorize the price range by price/SQFT
+    df['price_range'] = pd.cut(df['Price/SQFT'], bins=[-1, 0.5, 3.4, 4.2, 5.8, max(df['Price/SQFT'])+1], labels=[0, 1, 2, 3, 4], include_lowest=False)
     
     # Sort DataFrame by Datetime
     df.sort_values(by="Post Datetime", axis=0, ascending=False, inplace=True)
     
-    # Remove duplicates by post title
-    df.drop_duplicates(subset="Post Title", inplace=True)
-    df = df.reset_index(drop=True)
     
-    return df
+    return df[["PostAreaCode", "PostArea_coded", 'City Code', 'Area Code', 'Post Datetime', 'Post Date', 'Post Time', 'Post Title', 'Post URL', 'Neighborhood', 'Bedroom', 'SQFT', 'Price', 'IsFurnished', 'Price/SQFT', 'price_range']]
 
-def subplot_by_cluster(df, i):
+def subplot_by_cluster(df, i, param='cluster_labels'):
     """
     Plot result by cluster. 
         plot1: Price histgram. 
@@ -77,9 +77,9 @@ def subplot_by_cluster(df, i):
         plot6: Number of Furnished suite vs not Furnished
     """
     
-    cluster = df[df['cluster_labels'] == i]
+    cluster = df[df[param] == i]
     plt.rcParams.update({"figure.figsize": (10, 10), "figure.dpi": 120})
-    print(f'cluster_label: {i}\nLength of DataFrame: {len(cluster)}')
+    print(f'{param}: {i}\nLength of DataFrame: {len(cluster)}')
     fig, axs = plt.subplots(3, 2)
 
     # Plot Price histgram
@@ -123,4 +123,27 @@ def subplot_by_cluster(df, i):
 
     fig.tight_layout()
     plt.show()
+    
+def remove_outliers(df):
+    # lower-end of outliers
+    one_dollar = df[df["Price"] == 1]
+    zero_dollar = df[df["Price"] == 0]
+    
+    # Higher-end of outliers
+    high_prices = df[df["Price"] > 100_000]
+    # Drop low-end outliers rows
+    drop_index = []
+    for idx in one_dollar.index:
+        drop_index.append(idx)
+    for idx in zero_dollar.index:
+        drop_index.append(idx)
+    for idx in high_prices.index:
+        drop_index.append(idx)
+    print(f"Original DataFrame Size:{len(df)}\nNumber of Dropped Rows: {len(drop_index)}")
+    df.drop(drop_index,axis=0, inplace=True)
+    print(f"DataFrame size after drop rows: {len(df)}")
+    
+    
+    
+    return df
 
